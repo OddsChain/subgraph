@@ -1,0 +1,57 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Odd
+    network: mbase
+    source:
+      address: "0xF3F95e3b0A09Aeae9C5C110C29aB660830186D00"
+      abi: Odd
+      startBlock: 4605254
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - BetWinnings_Claimed
+        - Bet_Accepted
+        - Bet_Denied
+        - Bet_Joined
+        - Bet_Refunded
+        - Bet_Validated
+        - SingleBet_Created
+        - ValidatorReportDecided
+        - Validator_Assigned
+        - Validator_Joined
+        - Validator_Reported
+        - supportValidator
+      abis:
+        - name: Odd
+          file: ./abis/Odd.json
+      eventHandlers:
+        - event: BetWinnings_Claimed(uint256,address,uint256)
+          handler: handleBetWinnings_Claimed
+        - event: Bet_Accepted(uint256,bool,address,uint256)
+          handler: handleBet_Accepted
+        - event: Bet_Denied(uint256,bool,address)
+          handler: handleBet_Denied
+        - event: Bet_Joined(uint256,uint256,address,address[],uint256,uint256,uint256,uint256,uint256)
+          handler: handleBet_Joined
+        - event: Bet_Refunded(uint256,address,uint256)
+          handler: handleBet_Refunded
+        - event: Bet_Validated(uint256,uint256,address,uint256,uint256)
+          handler: handleBet_Validated
+        - event: SingleBet_Created(uint256,string,bool,uint256,address,address[])
+          handler: handleSingleBet_Created
+        - event: ValidatorReportDecided(uint256,uint256)
+          handler: handleValidatorReportDecided
+        - event: Validator_Assigned(uint256,bool,uint256,address)
+          handler: handleValidator_Assigned
+        - event: Validator_Joined(address,uint256)
+          handler: handleValidator_Joined
+        - event: Validator_Reported(address,address,string,uint256,uint256)
+          handler: handleValidator_Reported
+        - event: supportValidator(bool,uint256,address,uint256,uint256)
+          handler: handlesupportValidator
+      file: ./src/odd.ts
