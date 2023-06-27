@@ -1,4 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {
   Odd,
   BetWinnings_Claimed,
@@ -12,105 +12,167 @@ import {
   Validator_Assigned,
   Validator_Joined,
   Validator_Reported,
-  supportValidator
-} from "../generated/Odd/Odd"
-import { ExampleEntity } from "../generated/schema"
+  supportValidator,
+} from "../generated/Odd/Odd";
+import { Bet } from "../generated/schema";
 
-export function handleBetWinnings_Claimed(event: BetWinnings_Claimed): void {
-  // Entities can be loaded from the store using a string ID; this ID
-  // needs to be unique across all entities of the same type
-  let entity = ExampleEntity.load(event.transaction.from)
+export function handleBetWinnings_Claimed(event: BetWinnings_Claimed): void {}
 
-  // Entities only exist after they have been saved to the store;
-  // `null` checks allow to create entities on demand
-  if (!entity) {
-    entity = new ExampleEntity(event.transaction.from)
+export function handleBet_Accepted(event: Bet_Accepted): void {
+  let betEntity = Bet.load(generateBetEntityId(event.params.betID));
 
-    // Entity fields can be set using simple assignments
-    entity.count = BigInt.fromI32(0)
-  }
+  if (!betEntity) betEntity = new Bet(generateBetEntityId(event.params.betID));
 
-  // BigInt and BigDecimal math are supported
-  entity.count = entity.count + BigInt.fromI32(1)
+  betEntity.endTime = event.params.betEndTime;
+  betEntity.accepted = true;
 
-  // Entity fields can be set based on event parameters
-  entity.betID = event.params.betID
-  entity.user = event.params.user
-
-  // Entities can be written to the store with `.save()`
-  entity.save()
-
-  // Note: If a handler doesn't require existing field values, it is faster
-  // _not_ to load the entity from the store. Instead, create it fresh with
-  // `new Entity(...)`, set the fields that should be updated and save the
-  // entity back to the store. Fields that were not set or unset remain
-  // unchanged, allowing for partial updates to be applied.
-
-  // It is also possible to access smart contracts from mappings. For
-  // example, the contract that has emitted the event can be connected to
-  // with:
-  //
-  // let contract = Contract.bind(event.address)
-  //
-  // The following functions can then be called on this contract to access
-  // state variables and other data:
-  //
-  // - contract.CLAIM_WINNING_WAIT_TIME(...)
-  // - contract.VALIDATOR_STAKE_AMOUNT(...)
-  // - contract.VALIDATOR_VOTE_TIME(...)
-  // - contract._canValidate(...)
-  // - contract._hasValidated(...)
-  // - contract._hasVoted(...)
-  // - contract._isValidator(...)
-  // - contract._refundClaimed(...)
-  // - contract._singleBetClaimed(...)
-  // - contract._singleBetDetails(...)
-  // - contract._userBetAmount(...)
-  // - contract._userBetChoice(...)
-  // - contract._userDetails(...)
-  // - contract._userParticipation(...)
-  // - contract._validators(...)
-  // - contract.deployer(...)
-  // - contract.destinationAddress(...)
-  // - contract.destinationChain(...)
-  // - contract.estimatedCrossChainGasAmount(...)
-  // - contract.gasService(...)
-  // - contract.gateway(...)
-  // - contract.getCurrentTimeStamp(...)
-  // - contract.getIsValidator(...)
-  // - contract.getIsWinner(...)
-  // - contract.getRequiredNumberOfValidators(...)
-  // - contract.getUserDetails(...)
-  // - contract.getUserOddsBalance(...)
-  // - contract.getUserPossibleRewards(...)
-  // - contract.getUserStakeAmount(...)
-  // - contract.getUserWinnings(...)
-  // - contract.hasVoted(...)
-  // - contract.oddsTokenAddress(...)
-  // - contract.singleBetIDCounter(...)
-  // - contract.validators(...)
+  betEntity.save();
 }
 
-export function handleBet_Accepted(event: Bet_Accepted): void {}
+export function handleBet_Denied(event: Bet_Denied): void {
+  let betEntity = Bet.load(generateBetEntityId(event.params.betID));
 
-export function handleBet_Denied(event: Bet_Denied): void {}
+  if (!betEntity) betEntity = new Bet(generateBetEntityId(event.params.betID));
 
-export function handleBet_Joined(event: Bet_Joined): void {}
+  betEntity.accepted = false;
+
+  betEntity.save();
+}
+
+export function handleBet_Joined(event: Bet_Joined): void {
+  let betEntity = Bet.load(generateBetEntityId(event.params.betID));
+
+  if (!betEntity) betEntity = new Bet(generateBetEntityId(event.params.betID));
+
+  betEntity.participants = BigInt.fromI32(event.params.participants.length);
+
+  betEntity.yesPool = event.params.yesPool;
+  betEntity.noPool = event.params.noPool;
+
+  betEntity.yesParticipants = event.params.yesParticipants;
+  betEntity.noParticipants = event.params.noParticipants;
+
+  betEntity.save();
+}
 
 export function handleBet_Refunded(event: Bet_Refunded): void {}
 
-export function handleBet_Validated(event: Bet_Validated): void {}
+export function handleBet_Validated(event: Bet_Validated): void {
+  let betEntity = Bet.load(generateBetEntityId(event.params.betID));
 
-export function handleSingleBet_Created(event: SingleBet_Created): void {}
+  if (!betEntity) betEntity = new Bet(generateBetEntityId(event.params.betID));
+
+  betEntity.validationCount = event.params.validationCount;
+  betEntity.claimWaitTime = event.params.claimWaitTime;
+  betEntity.outCome = event.params.outcome;
+
+  betEntity.save();
+}
+
+export function handleSingleBet_Created(event: SingleBet_Created): void {
+  let betEntity = Bet.load(generateBetEntityId(event.params.betID));
+
+  if (!betEntity) betEntity = new Bet(generateBetEntityId(event.params.betID));
+
+  betEntity.betID = event.params.betID;
+  betEntity.betDescription = event.params.description;
+  betEntity.betType = event.params.betType;
+
+  // default values
+
+  betEntity.participants = BigInt.fromI32(0);
+  betEntity.creator = event.params.creator;
+
+  betEntity.outCome = BigInt.fromI32(0);
+
+  betEntity.validationCount = BigInt.fromI32(0);
+  betEntity.claimWaitTime = BigInt.fromI32(0);
+
+  betEntity.yesPool = BigInt.fromI32(0);
+  betEntity.noPool = BigInt.fromI32(0);
+  betEntity.totalPool = BigInt.fromI32(0);
+
+  betEntity.yesParticipants = BigInt.fromI32(0);
+  betEntity.noParticipants = BigInt.fromI32(0);
+
+  betEntity.reporter = Address.zero();
+  betEntity.maliciousValidator = Address.zero();
+  betEntity.reportDescription = "";
+  betEntity.currentlyChallenged = false;
+
+  betEntity.voteTime = BigInt.fromI32(0);
+  betEntity.support = BigInt.fromI32(0);
+  betEntity.oppose = BigInt.fromI32(0);
+  betEntity.reportOutcome = BigInt.fromI32(0);
+
+  if (event.params.betType == false) {
+    betEntity.validators = BigInt.fromI32(event.params.validators.length);
+    betEntity.endTime = event.params.betEndTime;
+    betEntity.accepted = true;
+    betEntity.toBeSetTime = BigInt.fromI32(0);
+  }
+
+  if (event.params.betType == true) {
+    betEntity.validators = BigInt.fromI32(0);
+    betEntity.endTime = BigInt.fromI32(0);
+    betEntity.accepted = false;
+    betEntity.toBeSetTime = event.params.betEndTime;
+  }
+
+  betEntity.save();
+}
 
 export function handleValidatorReportDecided(
   event: ValidatorReportDecided
-): void {}
+): void {
+  let betEntity = Bet.load(generateBetEntityId(event.params.betID));
 
-export function handleValidator_Assigned(event: Validator_Assigned): void {}
+  if (!betEntity) betEntity = new Bet(generateBetEntityId(event.params.betID));
+
+  betEntity.currentlyChallenged = false;
+  betEntity.reportOutcome = event.params.reportOutcome;
+
+  betEntity.save();
+}
+
+export function handleValidator_Assigned(event: Validator_Assigned): void {
+  let betEntity = Bet.load(generateBetEntityId(event.params.betID));
+
+  if (!betEntity) betEntity = new Bet(generateBetEntityId(event.params.betID));
+
+  betEntity.validators = BigInt.fromI32(event.params.validator.length);
+
+  betEntity.save();
+}
 
 export function handleValidator_Joined(event: Validator_Joined): void {}
 
-export function handleValidator_Reported(event: Validator_Reported): void {}
+export function handleValidator_Reported(event: Validator_Reported): void {
+  let betEntity = Bet.load(generateBetEntityId(event.params.betID));
 
-export function handlesupportValidator(event: supportValidator): void {}
+  if (!betEntity) betEntity = new Bet(generateBetEntityId(event.params.betID));
+
+  betEntity.maliciousValidator = event.params.validator;
+  betEntity.reportDescription = event.params.description;
+  betEntity.currentlyChallenged = true;
+  betEntity.voteTime = event.params.voteTime;
+  betEntity.reporter = event.params.reporter;
+
+  betEntity.save();
+}
+
+export function handlesupportValidator(event: supportValidator): void {
+  let betEntity = Bet.load(generateBetEntityId(event.params.betID));
+
+  if (!betEntity) betEntity = new Bet(generateBetEntityId(event.params.betID));
+
+  betEntity.support = event.params.support;
+
+  betEntity.oppose = event.params.oppose;
+
+  betEntity.save();
+}
+
+function generateBetEntityId(betId: BigInt): string {
+  return "BetID" + betId.toString();
+}

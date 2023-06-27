@@ -1,6 +1,6 @@
 specVersion: 0.0.5
 schema:
-  file: ./schema.graphql
+  file: schema.graphql
 dataSources:
   - kind: ethereum
     name: Odd
@@ -28,7 +28,7 @@ dataSources:
         - supportValidator
       abis:
         - name: Odd
-          file: ./abis/Odd.json
+          file: Odd/abis/Odd.json
       eventHandlers:
         - event: BetWinnings_Claimed(uint256,address,uint256)
           handler: handleBetWinnings_Claimed
@@ -54,4 +54,4 @@ dataSources:
           handler: handleValidator_Reported
         - event: supportValidator(bool,uint256,address,uint256,uint256)
           handler: handlesupportValidator
-      file: ./src/odd.ts
+      file: Odd/Odd.wasm
