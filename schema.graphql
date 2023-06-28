@@ -4,6 +4,7 @@ type Bet @entity {
   betDescription: String!
   betType: Boolean!
   validators: BigInt
+  validator: Bytes
   participants: BigInt
   creator: Bytes!
   endTime: BigInt
@@ -21,7 +22,6 @@ type Bet @entity {
   maliciousValidator: Bytes
   reportDescription: String
   currentlyChallenged: Boolean
-  voteTime: BigInt
   support: BigInt
   oppose: BigInt
   reportOutcome: BigInt

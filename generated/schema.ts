@@ -102,6 +102,23 @@ export class Bet extends Entity {
     }
   }
 
+  get validator(): Bytes | null {
+    let value = this.get("validator");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set validator(value: Bytes | null) {
+    if (!value) {
+      this.unset("validator");
+    } else {
+      this.set("validator", Value.fromBytes(<Bytes>value));
+    }
+  }
+
   get participants(): BigInt | null {
     let value = this.get("participants");
     if (!value || value.kind == ValueKind.NULL) {
@@ -377,23 +394,6 @@ export class Bet extends Entity {
 
   set currentlyChallenged(value: boolean) {
     this.set("currentlyChallenged", Value.fromBoolean(value));
-  }
-
-  get voteTime(): BigInt | null {
-    let value = this.get("voteTime");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set voteTime(value: BigInt | null) {
-    if (!value) {
-      this.unset("voteTime");
-    } else {
-      this.set("voteTime", Value.fromBigInt(<BigInt>value));
-    }
   }
 
   get support(): BigInt | null {

@@ -342,10 +342,6 @@ export class Validator_Reported__Params {
   get betID(): BigInt {
     return this._event.parameters[3].value.toBigInt();
   }
-
-  get voteTime(): BigInt {
-    return this._event.parameters[4].value.toBigInt();
-  }
 }
 
 export class supportValidator extends ethereum.Event {
@@ -433,20 +429,16 @@ export class Odd___singleBetDetailsResultBetReportStruct extends ethereum.Tuple 
     return this[4].toBoolean();
   }
 
-  get voteTime(): BigInt {
+  get support(): BigInt {
     return this[5].toBigInt();
   }
 
-  get support(): BigInt {
+  get oppose(): BigInt {
     return this[6].toBigInt();
   }
 
-  get oppose(): BigInt {
-    return this[7].toBigInt();
-  }
-
   get reportOutcome(): BigInt {
-    return this[8].toBigInt();
+    return this[7].toBigInt();
   }
 }
 
@@ -723,29 +715,6 @@ export class Odd extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  VALIDATOR_VOTE_TIME(): BigInt {
-    let result = super.call(
-      "VALIDATOR_VOTE_TIME",
-      "VALIDATOR_VOTE_TIME():(uint256)",
-      []
-    );
-
-    return result[0].toBigInt();
-  }
-
-  try_VALIDATOR_VOTE_TIME(): ethereum.CallResult<BigInt> {
-    let result = super.tryCall(
-      "VALIDATOR_VOTE_TIME",
-      "VALIDATOR_VOTE_TIME():(uint256)",
-      []
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBigInt());
-  }
-
   _canValidate(param0: Address): boolean {
     let result = super.call("_canValidate", "_canValidate(address):(bool)", [
       ethereum.Value.fromAddress(param0)
@@ -908,7 +877,7 @@ export class Odd extends ethereum.SmartContract {
   _singleBetDetails(param0: BigInt): Odd___singleBetDetailsResult {
     let result = super.call(
       "_singleBetDetails",
-      "_singleBetDetails(uint256):(uint256,string,bool,address,uint256,uint256,bool,uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256),(address,address,uint256,string,bool,uint256,uint256,uint256,uint256))",
+      "_singleBetDetails(uint256):(uint256,string,bool,address,uint256,uint256,bool,uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256),(address,address,uint256,string,bool,uint256,uint256,uint256))",
       [ethereum.Value.fromUnsignedBigInt(param0)]
     );
 
@@ -937,7 +906,7 @@ export class Odd extends ethereum.SmartContract {
   ): ethereum.CallResult<Odd___singleBetDetailsResult> {
     let result = super.tryCall(
       "_singleBetDetails",
-      "_singleBetDetails(uint256):(uint256,string,bool,address,uint256,uint256,bool,uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256),(address,address,uint256,string,bool,uint256,uint256,uint256,uint256))",
+      "_singleBetDetails(uint256):(uint256,string,bool,address,uint256,uint256,bool,uint256,uint256,uint256,(uint256,uint256,uint256,uint256,uint256,uint256,uint256),(address,address,uint256,string,bool,uint256,uint256,uint256))",
       [ethereum.Value.fromUnsignedBigInt(param0)]
     );
     if (result.reverted) {
@@ -1512,6 +1481,29 @@ export class Odd extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  getValidators(_betID: BigInt): Array<Address> {
+    let result = super.call(
+      "getValidators",
+      "getValidators(uint256):(address[])",
+      [ethereum.Value.fromUnsignedBigInt(_betID)]
+    );
+
+    return result[0].toAddressArray();
+  }
+
+  try_getValidators(_betID: BigInt): ethereum.CallResult<Array<Address>> {
+    let result = super.tryCall(
+      "getValidators",
+      "getValidators(uint256):(address[])",
+      [ethereum.Value.fromUnsignedBigInt(_betID)]
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddressArray());
   }
 
   hasVoted(_betID: BigInt): boolean {

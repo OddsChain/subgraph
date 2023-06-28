@@ -100,10 +100,11 @@ export function handleSingleBet_Created(event: SingleBet_Created): void {
   betEntity.reportDescription = "";
   betEntity.currentlyChallenged = false;
 
-  betEntity.voteTime = BigInt.fromI32(0);
   betEntity.support = BigInt.fromI32(0);
   betEntity.oppose = BigInt.fromI32(0);
   betEntity.reportOutcome = BigInt.fromI32(0);
+
+  betEntity.validator = Address.zero();
 
   if (event.params.betType == false) {
     betEntity.validators = BigInt.fromI32(event.params.validators.length);
@@ -140,7 +141,8 @@ export function handleValidator_Assigned(event: Validator_Assigned): void {
 
   if (!betEntity) betEntity = new Bet(generateBetEntityId(event.params.betID));
 
-  betEntity.validators = BigInt.fromI32(event.params.validator.length);
+  betEntity.validators = BigInt.fromI32(1);
+  betEntity.validator = event.params.validator;
 
   betEntity.save();
 }
@@ -155,7 +157,6 @@ export function handleValidator_Reported(event: Validator_Reported): void {
   betEntity.maliciousValidator = event.params.validator;
   betEntity.reportDescription = event.params.description;
   betEntity.currentlyChallenged = true;
-  betEntity.voteTime = event.params.voteTime;
   betEntity.reporter = event.params.reporter;
 
   betEntity.save();

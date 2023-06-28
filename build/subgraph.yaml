@@ -6,7 +6,7 @@ dataSources:
     name: Odd
     network: mbase
     source:
-      address: "0xe6B02DAde1E307FFE66a0664a7Ead2c8236eF5c7"
+      address: "0xf3e30B0891521D595247AEB48F72105A4434B09E"
       abi: Odd
       startBlock: 4605254
     mapping:
@@ -50,7 +50,7 @@ dataSources:
           handler: handleValidator_Assigned
         - event: Validator_Joined(address,uint256)
           handler: handleValidator_Joined
-        - event: Validator_Reported(address,address,string,uint256,uint256)
+        - event: Validator_Reported(address,address,string,uint256)
           handler: handleValidator_Reported
         - event: supportValidator(bool,uint256,address,uint256,uint256)
           handler: handlesupportValidator
